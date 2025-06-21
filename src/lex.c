@@ -1,80 +1,63 @@
 #include "bearc.h"
 
-static TokenKind map[] = {
-    ['('] = TK_LPAREN,     [')'] = TK_RPAREN, ['+'] = TK_PLUS, ['-'] = TK_MINUS,
-    ['/'] = TK_SLASH,      ['*'] = TK_SPLAT,  ['0'] = TK_INT,  ['1'] = TK_INT,
-    ['2'] = TK_INT,        ['3'] = TK_INT,    ['4'] = TK_INT,  ['5'] = TK_INT,
-    ['6'] = TK_INT,        ['7'] = TK_INT,    ['8'] = TK_INT,  ['9'] = TK_INT,
-    [';'] = TK_SEMI_COLON, ['.'] = TK_DOT};
-
-static unsigned int is_whitespace(char c) {
-  switch (c) {
-  case ' ':
-  case '\t':
-  case '\n':
-  case '\r':
-  case '\v':
-  case '\f':
-    return 1;
-  }
-
-  return 0;
+void lexer_init(Lexer *lexer, char *input) {
+  lexer->input = input;
+  lexer->pos = 0;
 }
 
-Token lex_next(Token token) {
-  if (token.kind == TK_EOF) {
-    return token;
-  }
-  return lex_start(token.val + token.len);
-}
+void lexer_next(Lexer *lexer, Token *out) {
+  int pos = lexer->pos;
+  int start = pos;
+  char *input = lexer->input;
 
-Token lex_start(char *input) {
-  char *start = input;
-  unsigned char len = 0;
-  Token t;
-  if (*start == '\0') {
-    t.kind = TK_EOF;
-    return t;
+  while (input[pos] == ' ' || input[pos] == '\t' || input[pos] == '\n' ||
+         input[pos] == '\r') {
+    pos += 1;
+    start = pos;
   }
 
-  while (is_whitespace(*start)) {
-    start += 1;
-  }
-
-  TokenKind kind;
-  kind = map[(unsigned char)*start];
-  len += 1;
-  switch (kind) {
-  case TK_EOF:
-  case TK_PLUS:
-  case TK_MINUS:
-  case TK_SLASH:
-  case TK_SPLAT:
-  case TK_LPAREN:
-  case TK_RPAREN:
-  case TK_SEMI_COLON:
-  case TK_DOT:
+  switch (input[pos]) {
+  case '\0':
+    out->kind = TK_EOF;
+    out->pos = pos;
+    return;
+  case '(':
+    out->kind = TK_LPAREN;
+    pos += 1;
     break;
-  case TK_INT:
-    while (map[(unsigned char)*(start + len)] == TK_INT) {
-      len += 1;
-    }
-    if (map[(unsigned char)*(start + len)] == TK_DOT) {
-      kind = TK_FLOAT;
-      len += 1;
-      while (map[(unsigned char)*(start + len)] == TK_INT) {
-        len += 1;
-      }
+  case ')':
+    out->kind = TK_RPAREN;
+    pos += 1;
+    break;
+  case '+':
+    out->kind = TK_PLUS;
+    pos += 1;
+    break;
+  case '-':
+    out->kind = TK_MINUS;
+    pos += 1;
+    break;
+  case '0':
+  case '1':
+  case '2':
+  case '3':
+  case '4':
+  case '5':
+  case '6':
+  case '7':
+  case '8':
+  case '9':
+    out->kind = TK_NUM;
+    out->num = input[pos] - '0';
+    pos += 1;
+    while ('0' <= input[pos] && input[pos] <= '9') {
+      out->num *= 10;
+      out->num += input[pos] - '0';
+      pos += 1;
     }
     break;
-  case TK_FLOAT:
-    break;
   }
 
-  t.kind = kind;
-  t.val = start;
-  t.len = len;
-  return t;
+  out->pos = start;
+  lexer->pos = pos;
 }
-
-Token lex_number(char *input) { exit(1); }
