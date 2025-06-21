@@ -4,7 +4,7 @@
 static char *map[] = {
     [TK_EOF] = "EOF",  [TK_PLUS] = "+",       [TK_MINUS] = "-",
     [TK_SLASH] = "/",  [TK_SPLAT] = "*",      [TK_LPAREN] = "(",
-    [TK_RPAREN] = ")", [TK_SEMI_COLON] = ";", [TK_NUM] = "NUMBER"};
+    [TK_RPAREN] = ")", [TK_SEMI_COLON] = ";", [TK_INT] = "INT"};
 
 static int is_num(char c);
 static void print_num(Token *token);
@@ -21,7 +21,7 @@ static void print_num(Token *token) {
 
 void print_token(Token *token) {
   switch (token->kind) {
-  case TK_NUM:
+  case TK_INT:
     print_num(token);
     break;
   default:
