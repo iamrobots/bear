@@ -1,4 +1,5 @@
 #include "bearc.h"
+#include <stdio.h>
 
 void lexer_init(Lexer *lexer, char *input) {
   lexer->input = input;
@@ -6,6 +7,7 @@ void lexer_init(Lexer *lexer, char *input) {
 }
 
 void lexer_next(Lexer *lexer, Token *out) {
+  *out = (Token){0};
   int pos = lexer->pos;
   int start = pos;
   char *input = lexer->input;
@@ -60,4 +62,31 @@ void lexer_next(Lexer *lexer, Token *out) {
 
   out->pos = start;
   lexer->pos = pos;
+}
+
+void print_token(Token token) {
+  printf("%d:", token.pos);
+  switch (token.kind) {
+  case TK_ERR:
+    printf("TK_ERR\n");
+    break;
+  case TK_EOF:
+    printf("TK_EOF\n");
+    break;
+  case TK_LPAREN:
+    printf("TK_LPAREN\n");
+    break;
+  case TK_RPAREN:
+    printf("TK_RPAREN\n");
+    break;
+  case TK_PLUS:
+    printf("TK_PLUS\n");
+    break;
+  case TK_MINUS:
+    printf("TK_MINUS\n");
+    break;
+  case TK_NUM:
+    printf("TK_NUM(%d)\n", token.num);
+    break;
+  }
 }

@@ -1,4 +1,7 @@
 #include "bearc.h"
 #include <stdio.h>
 
-int main(void) { printf("Hello world"); }
+int main(void) {
+  Lexer lexer;
+  lexer_init(&lexer, "");
+}
