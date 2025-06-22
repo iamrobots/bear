@@ -57,27 +57,59 @@ void lex_tests(void) {
 void parser_tests(void) {
   printf("start parser_tests\n");
   Token tokens[] = {{.pos = 0, .num = 0, .kind = TK_LPAREN},
-                    {.pos = 3, .num = 0, .kind = TK_PLUS},
-                    {.pos = 1, .num = 5, .kind = TK_NUM},
-                    {.pos = 5, .num = 6, .kind = TK_NUM}};
+                    {.pos = 4, .num = 0, .kind = TK_PLUS},
+                    {.pos = 1, .num = 55, .kind = TK_NUM},
+                    {.pos = 6, .num = 66, .kind = TK_NUM},
+                    {.pos = 10, .num = 0, .kind = TK_MINUS},
+                    {.pos = 12, .num = 7, .kind = TK_NUM}};
   ExprPool pool;
   Parser parser;
   ExprRef actual_ref;
   ExprRef expected_ref;
   expr_pool_init(&pool);
-  expected_ref = expr_grouping(&pool, tokens[0],
-                               expr_binary(&pool, tokens[1],
-                                           expr_literal(&pool, tokens[2]),
-                                           expr_literal(&pool, tokens[3])));
+  expected_ref =
+      expr_binary(&pool, tokens[4],
+                  expr_grouping(&pool, tokens[0],
+                                expr_binary(&pool, tokens[1],
+                                            expr_literal(&pool, tokens[2]),
+                                            expr_literal(&pool, tokens[3]))),
+                  expr_literal(&pool, tokens[5]));
 
-  parser_init(&parser, "(5 + 6)");
+  parser_init(&parser, "(55 + 66) - 7");
   actual_ref = parser_parse(&parser);
   assert_expr(&pool, expected_ref, &parser.pool, actual_ref);
   printf("end parser_tests\n");
 }
 
+void parser_tests2(void) {
+  printf("start parser_tests2\n");
+  Token tokens[] = {{.pos = 0, .num = 55, .kind = TK_NUM},
+                    {.pos = 3, .num = 0, .kind = TK_PLUS},
+                    {.pos = 5, .num = 0, .kind = TK_LPAREN},
+                    {.pos = 6, .num = 66, .kind = TK_NUM},
+                    {.pos = 9, .num = 0, .kind = TK_MINUS},
+                    {.pos = 11, .num = 7, .kind = TK_NUM}};
+  ExprPool pool;
+  Parser parser;
+  ExprRef actual_ref;
+  ExprRef expected_ref;
+  expr_pool_init(&pool);
+  expected_ref =
+      expr_binary(&pool, tokens[1], expr_literal(&pool, tokens[0]),
+                  expr_grouping(&pool, tokens[2],
+                                expr_binary(&pool, tokens[4],
+                                            expr_literal(&pool, tokens[3]),
+                                            expr_literal(&pool, tokens[5]))));
+
+  parser_init(&parser, "55 + (66 - 7)");
+  actual_ref = parser_parse(&parser);
+  assert_expr(&pool, expected_ref, &parser.pool, actual_ref);
+  printf("end parser_tests2\n");
+}
+
 int main(void) {
   lex_tests();
   parser_tests();
+  parser_tests2();
   return 0;
 }

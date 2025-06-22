@@ -8,9 +8,9 @@ fmt:
 	clang-format -i -- src/*.c src/*.h test/*.c test/*.h
 
 clean:
-	rm obj/*.o
-	rm bearc
-	rm bearc_tests
+	rm -f obj/*.o
+	rm -f bearc
+	rm -f bearc_tests
 
 bearc_tests: obj/tests.o obj/lex.o obj/parser.o obj/expr.o obj/utils.o
 	cc $(CFLAGS) -o $@ $^
