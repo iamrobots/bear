@@ -8,15 +8,19 @@ typedef enum {
   TK_RPAREN,
   TK_PLUS,
   TK_MINUS,
-  TK_NUM,
+  TK_STAR,
+  TK_SLASH,
+  TK_NUM
 } TokenKind;
+
+typedef union {
+  unsigned int num;
+} TokenValue;
 
 typedef struct Token Token;
 struct Token {
   unsigned int pos;
-  union {
-    int num;
-  };
+  TokenValue value;
   TokenKind kind;
 };
 
@@ -39,6 +43,14 @@ typedef struct ExprPool ExprPool;
 typedef struct Expr Expr;
 
 typedef enum { EX_ERR, EX_LITERAL, EX_BINARY, EX_GROUPING } ExprKind;
+typedef union {
+  struct {
+    ExprRef lhs;
+    ExprRef rhs;
+  } binary;
+  ExprRef inner;
+  int number;
+} ExprValue;
 
 struct Expr {
   union {
@@ -48,7 +60,7 @@ struct Expr {
     } binary;
     ExprRef inner;
     int number;
-  };
+  } value;
   Token token;
   ExprKind kind;
 };
@@ -57,7 +69,6 @@ ExprRef expr_error(ExprPool *pool, Token token, ExprRef ref);
 ExprRef expr_grouping(ExprPool *pool, Token token, ExprRef inner);
 ExprRef expr_binary(ExprPool *pool, Token token, ExprRef lhs, ExprRef rhs);
 ExprRef expr_literal(ExprPool *pool, Token token);
-void print_expr(ExprPool *pool, ExprRef ref);
 
 struct ExprPool {
   Expr *buff;

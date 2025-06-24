@@ -3,11 +3,17 @@
 #include <stdlib.h>
 
 ExprRef expr_error(ExprPool *pool, Token token, ExprRef ref) {
-  Expr expr = {.kind = EX_ERR, .token = token, .inner = ref};
+  Expr expr;
+  expr.kind = EX_ERR;
+  expr.token = token;
+  expr.value.inner = ref;
   return expr_pool_push(pool, expr);
 }
 ExprRef expr_grouping(ExprPool *pool, Token token, ExprRef inner) {
-  Expr expr = {.kind = EX_GROUPING, .token = token, .inner = inner};
+  Expr expr;
+  expr.kind = EX_GROUPING;
+  expr.token = token;
+  expr.value.inner = inner;
   return expr_pool_push(pool, expr);
 }
 
@@ -15,8 +21,8 @@ ExprRef expr_binary(ExprPool *pool, Token token, ExprRef lhs, ExprRef rhs) {
   Expr expr;
   expr.kind = EX_BINARY;
   expr.token = token;
-  expr.binary.lhs = lhs;
-  expr.binary.rhs = rhs;
+  expr.value.binary.lhs = lhs;
+  expr.value.binary.rhs = rhs;
   return expr_pool_push(pool, expr);
 }
 
@@ -26,7 +32,7 @@ ExprRef expr_literal(ExprPool *pool, Token token) {
   expr.token = token;
   switch (token.kind) {
   case TK_NUM:
-    expr.number = token.num;
+    expr.value.number = token.value.num;
     break;
   default:
     printf("Invalid literal");
@@ -34,8 +40,7 @@ ExprRef expr_literal(ExprPool *pool, Token token) {
     break;
   }
 
-  ExprRef ref = expr_pool_push(pool, expr);
-  return ref;
+  return expr_pool_push(pool, expr);
 }
 
 void expr_pool_init(ExprPool *pool) {
@@ -68,33 +73,4 @@ void expr_pool_free(ExprPool *pool) {
 
   free(pool->buff);
   pool->buff = NULL;
-}
-
-void print_expr(ExprPool *pool, ExprRef ref) {
-  Expr expr = *expr_pool_get(pool, ref);
-  switch (expr.kind) {
-  case EX_ERR:
-    printf("EX_ERR\n");
-    printf("  token: ");
-    print_token(expr.token);
-    break;
-  case EX_LITERAL:
-    printf("EX_LITERAL(%d)\n", expr.number);
-    printf("  token: ");
-    print_token(expr.token);
-    break;
-  case EX_BINARY:
-    printf("EX_BINARY\n");
-    printf("  token: ");
-    print_token(expr.token);
-    print_expr(pool, expr.binary.lhs);
-    print_expr(pool, expr.binary.rhs);
-    break;
-  case EX_GROUPING:
-    printf("EX_GROUPING\n");
-    printf("  token: ");
-    print_token(expr.token);
-    print_expr(pool, expr.inner);
-    break;
-  }
 }

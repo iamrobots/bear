@@ -9,10 +9,11 @@ static ExprRef parse_grouping(Parser *parser);
 static ExprRef parse_primary(Parser *parser);
 
 void parser_init(Parser *parser, char *input) {
+  Token token = {0};
   lexer_init(&parser->lexer, input);
   expr_pool_init(&parser->pool);
   parser->errors = 0;
-  parser->token = (Token){0};
+  parser->token = token;
 }
 
 ExprRef parser_parse(Parser *parser) {

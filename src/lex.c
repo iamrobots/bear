@@ -1,16 +1,18 @@
 #include "bearc.h"
 #include <stdio.h>
 
+static Token empty_token = {0};
+
 void lexer_init(Lexer *lexer, char *input) {
   lexer->input = input;
   lexer->pos = 0;
 }
 
 void lexer_next(Lexer *lexer, Token *out) {
-  *out = (Token){0};
   int pos = lexer->pos;
   int start = pos;
   char *input = lexer->input;
+  *out = empty_token;
 
   while (input[pos] == ' ' || input[pos] == '\t' || input[pos] == '\n' ||
          input[pos] == '\r') {
@@ -39,6 +41,14 @@ void lexer_next(Lexer *lexer, Token *out) {
     out->kind = TK_MINUS;
     pos += 1;
     break;
+  case '/':
+    out->kind = TK_SLASH;
+    pos += 1;
+    break;
+  case '*':
+    out->kind = TK_STAR;
+    pos += 1;
+    break;
   case '0':
   case '1':
   case '2':
@@ -50,11 +60,11 @@ void lexer_next(Lexer *lexer, Token *out) {
   case '8':
   case '9':
     out->kind = TK_NUM;
-    out->num = input[pos] - '0';
+    out->value.num = input[pos] - '0';
     pos += 1;
     while ('0' <= input[pos] && input[pos] <= '9') {
-      out->num *= 10;
-      out->num += input[pos] - '0';
+      out->value.num *= 10;
+      out->value.num += input[pos] - '0';
       pos += 1;
     }
     break;
@@ -85,8 +95,14 @@ void print_token(Token token) {
   case TK_MINUS:
     printf("TK_MINUS\n");
     break;
+  case TK_STAR:
+    printf("TK_STAR\n");
+    break;
+  case TK_SLASH:
+    printf("TK_SLASH\n");
+    break;
   case TK_NUM:
-    printf("TK_NUM(%d)\n", token.num);
+    printf("TK_NUM(%d)\n", token.value.num);
     break;
   }
 }
