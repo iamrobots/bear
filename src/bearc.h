@@ -80,6 +80,7 @@ void expr_pool_init(ExprPool *pool);
 ExprRef expr_pool_push(ExprPool *pool, Expr expr);
 Expr *expr_pool_get(ExprPool *pool, ExprRef ref);
 void expr_pool_free(ExprPool *pool);
+void pretty_print(ExprPool *pool, ExprRef ref);
 
 /* parser.c */
 
@@ -87,7 +88,6 @@ typedef struct Parser Parser;
 struct Parser {
   Lexer lexer;
   ExprPool pool;
-  Token token;
   ExprRef errors;
 };
 

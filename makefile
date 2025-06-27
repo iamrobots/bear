@@ -1,4 +1,4 @@
-CFLAGS=-std=c89 -Wall -Wextra -pedantic -g
+CFLAGS=-std=c89 -Wall -Wextra -pedantic -Werror -g
 
 all: bearc
 

@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static int assert_expr(ExprPool *lhs_pool, ExprRef lhs_ref, ExprPool *rhs_pool,
-                       ExprRef rhs_ref) {
+static int assert_expr_eq(ExprPool *lhs_pool, ExprRef lhs_ref,
+                          ExprPool *rhs_pool, ExprRef rhs_ref) {
   Expr lhs = *expr_pool_get(lhs_pool, lhs_ref);
   Expr rhs = *expr_pool_get(rhs_pool, rhs_ref);
 
@@ -24,26 +24,29 @@ static int assert_expr(ExprPool *lhs_pool, ExprRef lhs_ref, ExprPool *rhs_pool,
     ASSERT_EQ(lhs.value.number, rhs.value.number);
     return lhs.value.number == rhs.value.number;
   case EX_BINARY:
-    return assert_expr(lhs_pool, lhs.value.binary.lhs, rhs_pool,
-                       rhs.value.binary.lhs) &&
-           assert_expr(lhs_pool, lhs.value.binary.rhs, rhs_pool,
-                       rhs.value.binary.rhs);
+    return assert_expr_eq(lhs_pool, lhs.value.binary.lhs, rhs_pool,
+                          rhs.value.binary.lhs) &&
+           assert_expr_eq(lhs_pool, lhs.value.binary.rhs, rhs_pool,
+                          rhs.value.binary.rhs);
   case EX_ERR:
   case EX_GROUPING:
-    return assert_expr(lhs_pool, lhs.value.inner, rhs_pool, rhs.value.inner);
+    return assert_expr_eq(lhs_pool, lhs.value.inner, rhs_pool, rhs.value.inner);
   }
 
   return 1;
 }
 
 void lex_tests(void) {
-  printf("start lex_tests\n");
   Lexer lexer;
   Token token;
   TokenKind expected[] = {TK_PLUS, TK_MINUS, TK_NUM, TK_LPAREN, TK_RPAREN,
                           TK_STAR, TK_SLASH, TK_EOF, TK_EOF};
+  unsigned long i = 0;
+  printf("start lex_tests\n");
+
   lexer_init(&lexer, "+ - 567 () * /");
-  for (unsigned long i = 0; i < (sizeof(expected) / sizeof(expected[0])); ++i) {
+
+  for (; i < (sizeof(expected) / sizeof(expected[0])); ++i) {
     lexer_next(&lexer, &token);
     ASSERT_EQ(expected[i], token.kind);
   }
@@ -58,17 +61,17 @@ void lex_tests(void) {
 }
 
 void parser_tests(void) {
-  printf("start parser_tests\n");
+  char *input = "(55 + 66) - 7";
   Token tokens[] = {{.pos = 0, .value.num = 0, .kind = TK_LPAREN},
                     {.pos = 4, .value.num = 0, .kind = TK_PLUS},
                     {.pos = 1, .value.num = 55, .kind = TK_NUM},
                     {.pos = 6, .value.num = 66, .kind = TK_NUM},
                     {.pos = 10, .value.num = 0, .kind = TK_MINUS},
                     {.pos = 12, .value.num = 7, .kind = TK_NUM}};
-  ExprPool pool;
   Parser parser;
   ExprRef actual_ref;
   ExprRef expected_ref;
+  ExprPool pool;
   expr_pool_init(&pool);
   expected_ref =
       expr_binary(&pool, tokens[4],
@@ -78,14 +81,17 @@ void parser_tests(void) {
                                             expr_literal(&pool, tokens[3]))),
                   expr_literal(&pool, tokens[5]));
 
-  parser_init(&parser, "(55 + 66) - 7");
+  parser_init(&parser, input);
+
+  printf("start parser_tests\n");
   actual_ref = parser_parse(&parser);
-  assert_expr(&pool, expected_ref, &parser.pool, actual_ref);
+
+  assert_expr_eq(&pool, expected_ref, &parser.pool, actual_ref);
   printf("end parser_tests\n");
 }
 
 void parser_tests2(void) {
-  printf("start parser_tests2\n");
+  char *input = "55 + (66 - 7)";
   Token tokens[] = {{.pos = 0, .value.num = 55, .kind = TK_NUM},
                     {.pos = 3, .value.num = 0, .kind = TK_PLUS},
                     {.pos = 5, .value.num = 0, .kind = TK_LPAREN},
@@ -104,15 +110,44 @@ void parser_tests2(void) {
                                             expr_literal(&pool, tokens[3]),
                                             expr_literal(&pool, tokens[5]))));
 
-  parser_init(&parser, "55 + (66 - 7)");
+  parser_init(&parser, input);
+
+  printf("start parser_tests2\n");
   actual_ref = parser_parse(&parser);
-  assert_expr(&pool, expected_ref, &parser.pool, actual_ref);
+
+  assert_expr_eq(&pool, expected_ref, &parser.pool, actual_ref);
   printf("end parser_tests2\n");
+}
+
+void parser_tests3(void) {
+  char *input = "55 + 66 * 7";
+  Token tokens[] = {{.pos = 0, .value.num = 55, .kind = TK_NUM},
+                    {.pos = 3, .value.num = 0, .kind = TK_PLUS},
+                    {.pos = 5, .value.num = 66, .kind = TK_NUM},
+                    {.pos = 8, .value.num = 0, .kind = TK_STAR},
+                    {.pos = 10, .value.num = 7, .kind = TK_NUM}};
+  ExprPool pool;
+  Parser parser;
+  ExprRef actual_ref;
+  ExprRef expected_ref;
+  expr_pool_init(&pool);
+  expected_ref =
+      expr_binary(&pool, tokens[1], expr_literal(&pool, tokens[0]),
+                  expr_binary(&pool, tokens[3], expr_literal(&pool, tokens[2]),
+                              expr_literal(&pool, tokens[4])));
+  parser_init(&parser, input);
+
+  printf("start parser_tests3\n");
+  actual_ref = parser_parse(&parser);
+
+  assert_expr_eq(&pool, expected_ref, &parser.pool, actual_ref);
+  printf("end parser_tests3\n");
 }
 
 int main(void) {
   lex_tests();
   parser_tests();
   parser_tests2();
+  parser_tests3();
   return 0;
 }

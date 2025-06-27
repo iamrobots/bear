@@ -10,15 +10,16 @@ void lexer_init(Lexer *lexer, char *input) {
 
 void lexer_next(Lexer *lexer, Token *out) {
   int pos = lexer->pos;
-  int start = pos;
+  int start = 0;
   char *input = lexer->input;
   *out = empty_token;
 
   while (input[pos] == ' ' || input[pos] == '\t' || input[pos] == '\n' ||
          input[pos] == '\r') {
     pos += 1;
-    start = pos;
   }
+
+  start = pos;
 
   switch (input[pos]) {
   case '\0':

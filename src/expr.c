@@ -74,3 +74,41 @@ void expr_pool_free(ExprPool *pool) {
   free(pool->buff);
   pool->buff = NULL;
 }
+
+void pretty_print(ExprPool *pool, ExprRef ref) {
+  Expr *expr = expr_pool_get(pool, ref);
+  switch (expr->kind) {
+  case EX_ERR:
+    printf("ERROR");
+    break;
+  case EX_LITERAL:
+    printf("%d", expr->value.number);
+    break;
+  case EX_BINARY:
+    pretty_print(pool, expr->value.binary.lhs);
+    switch (expr->token.kind) {
+    case TK_PLUS:
+      printf(" + ");
+      break;
+    case TK_MINUS:
+      printf(" - ");
+      break;
+    case TK_STAR:
+      printf(" * ");
+      break;
+    case TK_SLASH:
+      printf(" / ");
+      break;
+    default:
+      printf(" ??? ");
+      break;
+    }
+    pretty_print(pool, expr->value.binary.rhs);
+    break;
+  case EX_GROUPING:
+    printf("(");
+    pretty_print(pool, expr->value.inner);
+    printf(")");
+    break;
+  }
+}
