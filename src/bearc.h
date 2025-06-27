@@ -3,14 +3,14 @@
 
 typedef enum {
   TK_ERR,
-  TK_EOF,
   TK_LPAREN,
   TK_RPAREN,
   TK_PLUS,
   TK_MINUS,
   TK_STAR,
   TK_SLASH,
-  TK_NUM
+  TK_NUM,
+  TK_EOF
 } TokenKind;
 
 typedef union {
