@@ -2,16 +2,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void parser_init(Parser *parser, char *input) {
-  lexer_init(&parser->lexer, input);
-  expr_pool_init(&parser->pool);
-  parser->errors = 0;
-}
-
 typedef struct {
   unsigned char a;
   unsigned char b;
 } Pair;
+
+static ExprRef parse_expr(Parser *parser, unsigned char min_b);
+static Token parser_peak_token(Parser *parser);
+static Token parser_next_token(Parser *parser);
+
+static Pair infix_priority[TK_EOF + 1] = {
+    [TK_MINUS] = {1, 2},
+    [TK_PLUS] = {1, 2},
+    [TK_SLASH] = {3, 4},
+    [TK_STAR] = {3, 4},
+};
 
 static Token parser_peak_token(Parser *parser) {
   Token token;
@@ -19,18 +24,12 @@ static Token parser_peak_token(Parser *parser) {
   lexer_next(&lexer, &token);
   return token;
 }
+
 static Token parser_next_token(Parser *parser) {
   Token token;
   lexer_next(&parser->lexer, &token);
   return token;
 }
-
-static Pair infix_priority[TK_EOF + 1] = {
-    [TK_MINUS] = {.a = 1, .b = 2},
-    [TK_PLUS] = {.a = 1, .b = 2},
-    [TK_SLASH] = {.a = 3, .b = 4},
-    [TK_STAR] = {.a = 3, .b = 4},
-};
 
 static ExprRef parse_expr(Parser *parser, unsigned char min_b) {
   ExprRef lhs = 0;
@@ -74,6 +73,12 @@ static ExprRef parse_expr(Parser *parser, unsigned char min_b) {
   }
 
   return lhs;
+}
+
+void parser_init(Parser *parser, char *input) {
+  lexer_init(&parser->lexer, input);
+  expr_pool_init(&parser->pool);
+  parser->errors = 0;
 }
 
 ExprRef parser_parse(Parser *parser) { return parse_expr(parser, 0); }

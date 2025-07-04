@@ -6,14 +6,14 @@ ExprRef expr_error(ExprPool *pool, Token token, ExprRef ref) {
   Expr expr;
   expr.kind = EX_ERR;
   expr.token = token;
-  expr.value.inner = ref;
+  expr.value.grouping = ref;
   return expr_pool_push(pool, expr);
 }
 ExprRef expr_grouping(ExprPool *pool, Token token, ExprRef inner) {
   Expr expr;
   expr.kind = EX_GROUPING;
   expr.token = token;
-  expr.value.inner = inner;
+  expr.value.grouping = inner;
   return expr_pool_push(pool, expr);
 }
 
@@ -32,7 +32,7 @@ ExprRef expr_literal(ExprPool *pool, Token token) {
   expr.token = token;
   switch (token.kind) {
   case TK_NUM:
-    expr.value.number = token.value.num;
+    expr.value.literal.integer = token.value.integer;
     break;
   default:
     printf("Invalid literal");
@@ -82,7 +82,7 @@ void pretty_print(ExprPool *pool, ExprRef ref) {
     printf("ERROR");
     break;
   case EX_LITERAL:
-    printf("%d", expr->value.number);
+    printf("%d", expr->value.literal.integer);
     break;
   case EX_BINARY:
     pretty_print(pool, expr->value.binary.lhs);
@@ -107,7 +107,7 @@ void pretty_print(ExprPool *pool, ExprRef ref) {
     break;
   case EX_GROUPING:
     printf("(");
-    pretty_print(pool, expr->value.inner);
+    pretty_print(pool, expr->value.grouping);
     printf(")");
     break;
   }

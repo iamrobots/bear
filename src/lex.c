@@ -23,32 +23,36 @@ void lexer_next(Lexer *lexer, Token *out) {
 
   switch (input[pos]) {
   case '\0':
-    out->kind = TK_EOF;
     out->pos = pos;
+    out->kind = TK_EOF;
     return;
   case '(':
-    out->kind = TK_LPAREN;
     pos += 1;
+    out->kind = TK_LPAREN;
     break;
   case ')':
-    out->kind = TK_RPAREN;
     pos += 1;
+    out->kind = TK_RPAREN;
     break;
   case '+':
-    out->kind = TK_PLUS;
     pos += 1;
+    out->kind = TK_PLUS;
     break;
   case '-':
-    out->kind = TK_MINUS;
     pos += 1;
+    out->kind = TK_MINUS;
     break;
   case '/':
-    out->kind = TK_SLASH;
     pos += 1;
+    out->kind = TK_SLASH;
     break;
   case '*':
-    out->kind = TK_STAR;
     pos += 1;
+    out->kind = TK_STAR;
+    break;
+  case ';':
+    pos += 1;
+    out->kind = TK_SEMICOLON;
     break;
   case '0':
   case '1':
@@ -61,11 +65,11 @@ void lexer_next(Lexer *lexer, Token *out) {
   case '8':
   case '9':
     out->kind = TK_NUM;
-    out->value.num = input[pos] - '0';
+    out->value.integer = input[pos] - '0';
     pos += 1;
     while ('0' <= input[pos] && input[pos] <= '9') {
-      out->value.num *= 10;
-      out->value.num += input[pos] - '0';
+      out->value.integer *= 10;
+      out->value.integer += input[pos] - '0';
       pos += 1;
     }
     break;
@@ -73,37 +77,4 @@ void lexer_next(Lexer *lexer, Token *out) {
 
   out->pos = start;
   lexer->pos = pos;
-}
-
-void print_token(Token token) {
-  printf("%d:", token.pos);
-  switch (token.kind) {
-  case TK_ERR:
-    printf("TK_ERR\n");
-    break;
-  case TK_EOF:
-    printf("TK_EOF\n");
-    break;
-  case TK_LPAREN:
-    printf("TK_LPAREN\n");
-    break;
-  case TK_RPAREN:
-    printf("TK_RPAREN\n");
-    break;
-  case TK_PLUS:
-    printf("TK_PLUS\n");
-    break;
-  case TK_MINUS:
-    printf("TK_MINUS\n");
-    break;
-  case TK_STAR:
-    printf("TK_STAR\n");
-    break;
-  case TK_SLASH:
-    printf("TK_SLASH\n");
-    break;
-  case TK_NUM:
-    printf("TK_NUM(%d)\n", token.value.num);
-    break;
-  }
 }

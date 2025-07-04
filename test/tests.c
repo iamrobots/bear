@@ -14,15 +14,15 @@ static int assert_expr_eq(ExprPool *lhs_pool, ExprRef lhs_ref,
 
   if (lhs.kind != rhs.kind || lhs.token.kind != rhs.token.kind ||
       lhs.token.pos != rhs.token.pos ||
-      lhs.token.value.num != rhs.token.value.num) {
+      lhs.token.value.integer != rhs.token.value.integer) {
     return 0;
   }
 
   switch (lhs.kind) {
   case EX_LITERAL:
-    ASSERT_EQ(lhs.token.value.num, rhs.token.value.num);
-    ASSERT_EQ(lhs.value.number, rhs.value.number);
-    return lhs.value.number == rhs.value.number;
+    ASSERT_EQ(lhs.token.value.integer, rhs.token.value.integer);
+    ASSERT_EQ(lhs.value.literal.integer, rhs.value.literal.integer);
+    return lhs.value.literal.integer == rhs.value.literal.integer;
   case EX_BINARY:
     return assert_expr_eq(lhs_pool, lhs.value.binary.lhs, rhs_pool,
                           rhs.value.binary.lhs) &&
@@ -30,7 +30,8 @@ static int assert_expr_eq(ExprPool *lhs_pool, ExprRef lhs_ref,
                           rhs.value.binary.rhs);
   case EX_ERR:
   case EX_GROUPING:
-    return assert_expr_eq(lhs_pool, lhs.value.inner, rhs_pool, rhs.value.inner);
+    return assert_expr_eq(lhs_pool, lhs.value.grouping, rhs_pool,
+                          rhs.value.grouping);
   }
 
   return 1;
@@ -56,18 +57,18 @@ void lex_tests(void) {
   lexer_next(&lexer, &token);
   ASSERT_EQ(0, token.pos);
   ASSERT_EQ(TK_NUM, token.kind);
-  ASSERT_EQ(1234567890, token.value.num);
+  ASSERT_EQ(1234567890, token.value.integer);
   printf("end lex_tests\n");
 }
 
 void parser_tests(void) {
   char *input = "(55 + 66) - 7";
-  Token tokens[] = {{.pos = 0, .value.num = 0, .kind = TK_LPAREN},
-                    {.pos = 4, .value.num = 0, .kind = TK_PLUS},
-                    {.pos = 1, .value.num = 55, .kind = TK_NUM},
-                    {.pos = 6, .value.num = 66, .kind = TK_NUM},
-                    {.pos = 10, .value.num = 0, .kind = TK_MINUS},
-                    {.pos = 12, .value.num = 7, .kind = TK_NUM}};
+  Token tokens[] = {{.pos = 0, .value.integer = 0, .kind = TK_LPAREN},
+                    {.pos = 4, .value.integer = 0, .kind = TK_PLUS},
+                    {.pos = 1, .value.integer = 55, .kind = TK_NUM},
+                    {.pos = 6, .value.integer = 66, .kind = TK_NUM},
+                    {.pos = 10, .value.integer = 0, .kind = TK_MINUS},
+                    {.pos = 12, .value.integer = 7, .kind = TK_NUM}};
   Parser parser;
   ExprRef actual_ref;
   ExprRef expected_ref;
@@ -92,12 +93,12 @@ void parser_tests(void) {
 
 void parser_tests2(void) {
   char *input = "55 + (66 - 7)";
-  Token tokens[] = {{.pos = 0, .value.num = 55, .kind = TK_NUM},
-                    {.pos = 3, .value.num = 0, .kind = TK_PLUS},
-                    {.pos = 5, .value.num = 0, .kind = TK_LPAREN},
-                    {.pos = 6, .value.num = 66, .kind = TK_NUM},
-                    {.pos = 9, .value.num = 0, .kind = TK_MINUS},
-                    {.pos = 11, .value.num = 7, .kind = TK_NUM}};
+  Token tokens[] = {{.pos = 0, .value.integer = 55, .kind = TK_NUM},
+                    {.pos = 3, .value.integer = 0, .kind = TK_PLUS},
+                    {.pos = 5, .value.integer = 0, .kind = TK_LPAREN},
+                    {.pos = 6, .value.integer = 66, .kind = TK_NUM},
+                    {.pos = 9, .value.integer = 0, .kind = TK_MINUS},
+                    {.pos = 11, .value.integer = 7, .kind = TK_NUM}};
   ExprPool pool;
   Parser parser;
   ExprRef actual_ref;
@@ -121,11 +122,11 @@ void parser_tests2(void) {
 
 void parser_tests3(void) {
   char *input = "55 + 66 * 7";
-  Token tokens[] = {{.pos = 0, .value.num = 55, .kind = TK_NUM},
-                    {.pos = 3, .value.num = 0, .kind = TK_PLUS},
-                    {.pos = 5, .value.num = 66, .kind = TK_NUM},
-                    {.pos = 8, .value.num = 0, .kind = TK_STAR},
-                    {.pos = 10, .value.num = 7, .kind = TK_NUM}};
+  Token tokens[] = {{.pos = 0, .value.integer = 55, .kind = TK_NUM},
+                    {.pos = 3, .value.integer = 0, .kind = TK_PLUS},
+                    {.pos = 5, .value.integer = 66, .kind = TK_NUM},
+                    {.pos = 8, .value.integer = 0, .kind = TK_STAR},
+                    {.pos = 10, .value.integer = 7, .kind = TK_NUM}};
   ExprPool pool;
   Parser parser;
   ExprRef actual_ref;

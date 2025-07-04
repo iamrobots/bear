@@ -5,6 +5,7 @@ typedef enum {
   TK_ERR,
   TK_LPAREN,
   TK_RPAREN,
+  TK_SEMICOLON,
   TK_PLUS,
   TK_MINUS,
   TK_STAR,
@@ -13,14 +14,12 @@ typedef enum {
   TK_EOF
 } TokenKind;
 
-typedef union {
-  unsigned int num;
-} TokenValue;
-
 typedef struct Token Token;
 struct Token {
-  unsigned int pos;
-  TokenValue value;
+  union {
+    unsigned integer;
+  } value;
+  unsigned pos;
   TokenKind kind;
 };
 
@@ -34,7 +33,6 @@ struct Lexer {
 
 void lexer_init(Lexer *lexer, char *input);
 void lexer_next(Lexer *lexer, Token *out);
-void print_token(Token token);
 
 /* expr.c */
 
@@ -43,23 +41,16 @@ typedef struct ExprPool ExprPool;
 typedef struct Expr Expr;
 
 typedef enum { EX_ERR, EX_LITERAL, EX_BINARY, EX_GROUPING } ExprKind;
-typedef union {
-  struct {
-    ExprRef lhs;
-    ExprRef rhs;
-  } binary;
-  ExprRef inner;
-  int number;
-} ExprValue;
-
 struct Expr {
   union {
+    union {
+      unsigned integer;
+    } literal;
     struct {
       ExprRef lhs;
       ExprRef rhs;
     } binary;
-    ExprRef inner;
-    int number;
+    ExprRef grouping;
   } value;
   Token token;
   ExprKind kind;
