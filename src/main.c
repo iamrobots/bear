@@ -10,6 +10,6 @@ int main(int argc, char *argv[]) {
   }
   parser_init(&parser, argv[1]);
   ref = parser_parse(&parser);
-  pretty_print(&parser.pool, ref);
+  eval(&parser.pool, ref);
   printf("\n");
 }

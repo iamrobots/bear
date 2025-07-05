@@ -21,8 +21,8 @@ static int assert_expr_eq(ExprPool *lhs_pool, ExprRef lhs_ref,
   switch (lhs.kind) {
   case EX_LITERAL:
     ASSERT_EQ(lhs.token.value.integer, rhs.token.value.integer);
-    ASSERT_EQ(lhs.value.literal.integer, rhs.value.literal.integer);
-    return lhs.value.literal.integer == rhs.value.literal.integer;
+    ASSERT_EQ(lhs.value.literal.usize, rhs.value.literal.usize);
+    return lhs.value.literal.usize == rhs.value.literal.usize;
   case EX_BINARY:
     return assert_expr_eq(lhs_pool, lhs.value.binary.lhs, rhs_pool,
                           rhs.value.binary.lhs) &&

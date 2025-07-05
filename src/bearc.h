@@ -44,7 +44,7 @@ typedef enum { EX_ERR, EX_LITERAL, EX_BINARY, EX_GROUPING } ExprKind;
 struct Expr {
   union {
     union {
-      unsigned integer;
+      unsigned usize;
     } literal;
     struct {
       ExprRef lhs;
@@ -84,5 +84,9 @@ struct Parser {
 
 void parser_init(Parser *parser, char *input);
 ExprRef parser_parse(Parser *parser);
+
+/* eval */
+
+void eval(ExprPool *pool, ExprRef ref);
 
 #endif

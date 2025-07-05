@@ -15,10 +15,13 @@ clean:
 bearc_tests: obj/tests.o obj/lex.o obj/parser.o obj/expr.o obj/utils.o
 	cc $(CFLAGS) -o $@ $^
 
-bearc: obj/lex.o obj/parser.o obj/expr.o obj/main.o
+bearc: obj/lex.o obj/parser.o obj/expr.o obj/main.o obj/eval.o
 	cc $(CFLAGS) -o $@ $^
 
 obj/lex.o: src/lex.c
+	cc $(CFLAGS) -c -o $@ $^
+
+obj/eval.o: src/eval.c
 	cc $(CFLAGS) -c -o $@ $^
 
 obj/expr.o: src/expr.c

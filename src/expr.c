@@ -32,7 +32,7 @@ ExprRef expr_literal(ExprPool *pool, Token token) {
   expr.token = token;
   switch (token.kind) {
   case TK_NUM:
-    expr.value.literal.integer = token.value.integer;
+    expr.value.literal.usize = token.value.integer;
     break;
   default:
     printf("Invalid literal");
@@ -82,7 +82,7 @@ void pretty_print(ExprPool *pool, ExprRef ref) {
     printf("ERROR");
     break;
   case EX_LITERAL:
-    printf("%d", expr->value.literal.integer);
+    printf("%d", expr->value.literal.usize);
     break;
   case EX_BINARY:
     pretty_print(pool, expr->value.binary.lhs);
