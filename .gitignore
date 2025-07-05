@@ -2,3 +2,4 @@ obj/
 bearc
 bearc_tests
 .idea
+.DS_Store
