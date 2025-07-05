@@ -1,6 +1,6 @@
 # Bear compiler
 
-A compiler
+An experimental compiler.
 
 ## links
 
